@@ -1,0 +1,1 @@
+default_app_config = 'gpu_info.apps.GpuInfoConfig'
