@@ -1,0 +1,9 @@
+__pycache__
+.vscode
+
+running_log
+
+*/migrations
+
+*.sqlite3*
+
