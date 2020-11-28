@@ -60,15 +60,17 @@ class GPUInfoUpdater:
                             memory_total=gpu['memory.total'],
                             memory_used=gpu['memory.used'],
                             processes='\n'.join(map(lambda x: json.dumps(x), gpu['processes'])),
+                            complete_free=len(gpu['processes']) == 0,
                             server=server
                         )
                         gpu_info.save()
                     else:
                         gpu_info = GPUInfo.objects.get(uuid=gpu['uuid'])
-                        gpu_info.utilization=self.update_utilization(gpu['uuid'], gpu['utilization.gpu'])
-                        gpu_info.memory_total=gpu['memory.total']
-                        gpu_info.memory_used=gpu['memory.used']
-                        gpu_info.processes='\n'.join(map(lambda x: json.dumps(x), gpu['processes']))
+                        gpu_info.utilization = self.update_utilization(gpu['uuid'], gpu['utilization.gpu'])
+                        gpu_info.memory_total = gpu['memory.total']
+                        gpu_info.memory_used = gpu['memory.used']
+                        gpu_info.complete_free = len(gpu['processes']) == 0
+                        gpu_info.processes = '\n'.join(map(lambda x: json.dumps(x), gpu['processes']))
                         gpu_info.save()
             except subprocess.CalledProcessError:
                 print('Update ' + server.ip + ' failed')
