@@ -4,13 +4,21 @@ import subprocess
 import json
 import time
 
-from gpu_manager.settings import SERVER_USERNAME
+from gpu_manager.settings import RUNNING_LOG_DIR
 from .models import GPUTask, GPUTaskRunningLog
 
 
+def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
+    if private_key_path is None:
+        cmd = "ssh {}@{} \"{}\"".format(user, host, exec_cmd)
+    else:
+        cmd = "ssh -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
+    return cmd
+
+
 class RemoteProcess:
-    def __init__(self, user, host, cmd, workspace="~", output_file=None):
-        self.cmd = "ssh " + user + "@" + host + " \"" + "cd " + workspace + " && " + cmd + "\""
+    def __init__(self, user, host, cmd, workspace="~", private_key_path=None, output_file=None):
+        self.cmd = generate_ssh_cmd(host, user, "cd {} && {}".format(workspace, cmd), private_key_path)
         print(self.cmd)
         if output_file is not None:
             self.output_file = output_file
@@ -32,10 +40,10 @@ class RemoteProcess:
 
 
 class RemoteGPUProcess(RemoteProcess):
-    def __init__(self, user, host, gpus, cmd, workspace="~", output_file=None):
-        env = 'CUDA_VISIBLE_DEVICES=' + ','.join(map(str, gpus))
-        cmd = env + ' bash -c \'' + cmd + '\''
-        super(RemoteGPUProcess, self).__init__(user, host, cmd, workspace, output_file)
+    def __init__(self, user, host, gpus, cmd, workspace="~", private_key_path=None, output_file=None):
+        env = 'CUDA_VISIBLE_DEVICES={}'.format(','.join(map(str, gpus)))
+        cmd = '{} bash -c \'{}\''.format(env, cmd)
+        super(RemoteGPUProcess, self).__init__(user, host, cmd, workspace, private_key_path, output_file)
 
 
 def run_task(task, available_server):
@@ -43,10 +51,18 @@ def run_task(task, available_server):
     gpus = available_server['gpus']
     index = task.task_logs.all().count()
     log_file_path = os.path.join(
-        'running_log',
+        RUNNING_LOG_DIR,
         '{:d}_{:s}_{:s}_{:d}_{:d}.log'.format(task.id, task.name, server.ip, index, int(time.time()))
     )
-    process = RemoteGPUProcess(SERVER_USERNAME, server.ip, gpus, task.cmd, task.workspace, log_file_path)
+    process = RemoteGPUProcess(
+        task.user.config.server_username,
+        server.ip,
+        gpus,
+        task.cmd,
+        task.workspace,
+        task.user.config.server_private_key_path,
+        log_file_path
+    )
     pid = process.pid()
     print('Task {:d}-{:s} is running, pid: {:d}'.format(task.id, task.name, pid))
     server.set_gpus_busy(gpus)

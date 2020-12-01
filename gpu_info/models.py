@@ -2,8 +2,8 @@ from django.db import models
 
 
 class GPUServer(models.Model):
-    ip = models.GenericIPAddressField('IP地址', protocol='IPv4', primary_key=True)
-    hostname = models.CharField('主机名', max_length=10)
+    ip = models.CharField('IP地址', max_length=50, primary_key=True)
+    hostname = models.CharField('主机名', max_length=50, blank=True, null=True)
     valid = models.BooleanField('是否可用', default=True)
     can_use = models.BooleanField('是否可调度', default=True)
     # TODO(Yuhao Wang): CPU使用率

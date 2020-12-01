@@ -9,10 +9,10 @@ class GPUServerAdmin(admin.ModelAdmin):
     search_fields = ('ip', 'hostname', 'valid', 'can_use')
     list_display_links = ('ip',)
     ordering = ('ip',)
-    readonly_fields = ('ip', 'hostname',)
+    readonly_fields = ('hostname',)
 
     def has_add_permission(self, request):
-        return False
+        return request.user.is_superuser
 
 
 @admin.register(GPUInfo)

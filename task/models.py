@@ -5,6 +5,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from gpu_info.models import GPUServer, GPUInfo
+from django.contrib.auth.models import User
 
 
 class GPUTask(models.Model):
@@ -16,6 +17,7 @@ class GPUTask(models.Model):
         (2, '已完成'),
     )
     name = models.CharField('任务名称', max_length=100)
+    user = models.ForeignKey(User, verbose_name='用户', on_delete=models.CASCADE, related_name='tasks')
     workspace = models.CharField('工作目录', max_length=200)
     cmd = models.CharField('命令', max_length=200)
     gpu_requirement = models.PositiveSmallIntegerField(

@@ -9,11 +9,22 @@ class GPUTaskAdmin(admin.ModelAdmin):
     list_filter = ('gpu_requirement', 'status', 'assign_server', 'priority')
     search_fields = ('name', 'status',)
     list_display_links = ('name',)
-    readonly_fields = ('create_at',)
+    readonly_fields = ('create_at', 'user',)
     actions = ('copy_task', 'restart_task',)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
 
     def has_add_permission(self, request):
         return True
+    
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.user = request.user
+        super().save_model(request, obj, form, change)
 
     def color_status(self, obj):
         if obj.status == -2:
@@ -88,6 +99,12 @@ class GPUTaskRunningLogAdmin(admin.ModelAdmin):
     )
     actions = ('kill_button',)
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(task__user=request.user)
+
     def has_add_permission(self, request):
         return False
 
@@ -132,4 +149,3 @@ class GPUTaskRunningLogAdmin(admin.ModelAdmin):
     kill_button.icon = 'el-icon-error'
     kill_button.type = 'danger'
     kill_button.confirm = '是否执意结束选中进程？'
-

@@ -5,30 +5,43 @@ import json
 from .models import GPUServer, GPUInfo
 
 
-def get_hostname(user, host):
+def ssh_execute(host, user, exec_cmd, private_key_path=None):
+    if private_key_path is None:
+        cmd = "ssh {}@{} \"{}\"".format(user, host, exec_cmd)
+    else:
+        cmd = "ssh -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
+    return subprocess.check_output(cmd, shell=True)
+
+
+def get_hostname(host, user, private_key_path=None):
     cmd = "hostname"
-    return str(subprocess.check_output(
-        "ssh " + user + "@" + host + " \"" + cmd + "\"",
-        shell=True
+    return str(ssh_execute(
+        host,
+        user,
+        cmd,
+        private_key_path
     ).replace(b'\n', b'')).replace('b\'', '').replace('\'', '')
 
 
-def add_server(username, ip):
-    hostname = get_hostname(username, ip)
-    server = GPUServer(ip=ip, hostname=hostname) 
+def add_hostname(server, user, private_key_path=None):
+    hostname = get_hostname(server.ip, user, private_key_path)
+    server.hostname = hostname
     server.save()
 
 
-def get_gpu_info(user, host, gpustat_path):
-    return json.loads(subprocess.check_output(
-        "ssh " + user + "@" + host + " \"" + gpustat_path + " --json\"",
-        shell=True
+def get_gpu_info(host, user, gpustat_path, private_key_path=None):
+    return json.loads(ssh_execute(
+        host,
+        user,
+        '{} --json'.format(gpustat_path),
+        private_key_path
     ).replace(b'\n', b''))
 
 
 class GPUInfoUpdater:
-    def __init__(self, username, gpustat_path):
-        self.username = username
+    def __init__(self, user, gpustat_path, private_key_path=None):
+        self.user = user
+        self.private_key_path = private_key_path
         self.gpustat_path = gpustat_path
         self.utilization_history = {}
     
@@ -46,7 +59,9 @@ class GPUInfoUpdater:
         server_list = GPUServer.objects.all()
         for server in server_list:
             try:
-                gpu_info_json = get_gpu_info(self.username, server.ip, self.gpustat_path)
+                if server.hostname is None or server.hostname == '':
+                    add_hostname(server, self.user, self.private_key_path)
+                gpu_info_json = get_gpu_info(server.ip, self.user, self.gpustat_path, self.private_key_path)
                 if not server.valid:
                     server.valid = True
                     server.save()

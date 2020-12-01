@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,9 +26,7 @@ SECRET_KEY = '&e$9q=9ak)%8l)^w_n89ip4m5d27^@32$vy#&k53q%g^$)y)rh'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost'
-]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'base',
     'gpu_info',
     'task'
 ]
@@ -127,6 +127,11 @@ STATIC_URL = '/static/'
 SIMPLEUI_ANALYSIS = False
 SIMPLEUI_HOME_INFO = False
 
-SERVER_USERNAME = ''
-SERVER_GPUSTAT_PATH = ''
-SERVER_IP_LIST = []
+RUNNING_LOG_DIR = 'running_log'
+PRIVATE_KEY_DIR = 'private_key'
+
+if not os.path.isdir(RUNNING_LOG_DIR):
+    os.makedirs(RUNNING_LOG_DIR)
+
+if not os.path.isdir(PRIVATE_KEY_DIR):
+    os.makedirs(PRIVATE_KEY_DIR)
