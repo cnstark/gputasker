@@ -46,7 +46,7 @@ class GPUInfo(models.Model):
     processes = models.TextField('进程')
     server = models.ForeignKey(GPUServer, verbose_name='服务器', on_delete=models.CASCADE, related_name='gpus')
     free = models.BooleanField('是否可用', default=True)
-    complete_free = models.BooleanField('完全可用', default=False)
+    complete_free = models.BooleanField('完全空闲', default=False)
     update_at = models.DateTimeField('更新时间', auto_now=True)
 
     class Meta:
