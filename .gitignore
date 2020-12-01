@@ -2,8 +2,10 @@ __pycache__
 .vscode
 
 running_log
+private_key
 
-*/migrations
+*/migrations/*
+!*/migrations/__init__.py
 
 *.sqlite3*
 
