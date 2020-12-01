@@ -7,9 +7,9 @@ from .models import GPUServer, GPUInfo
 
 def ssh_execute(host, user, exec_cmd, private_key_path=None):
     if private_key_path is None:
-        cmd = "ssh {}@{} \"{}\"".format(user, host, exec_cmd)
+        cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
     else:
-        cmd = "ssh -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
+        cmd = "ssh -o StrictHostKeyChecking=no -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
     return subprocess.check_output(cmd, shell=True)
 
 
