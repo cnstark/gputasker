@@ -5,7 +5,7 @@ from .models import GPUTask, GPUTaskRunningLog
 
 @admin.register(GPUTask)
 class GPUTaskAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'workspace', 'cmd', 'gpu_requirement', 'memory_requirement', 'utilization_requirement', 'assign_server', 'priority', 'color_status', 'create_at',)
+    list_display = ('id', 'name', 'workspace', 'cmd', 'gpu_requirement', 'exclusive_gpu', 'memory_requirement', 'utilization_requirement', 'assign_server', 'priority', 'color_status', 'create_at',)
     list_filter = ('gpu_requirement', 'status', 'assign_server', 'priority')
     search_fields = ('name', 'status',)
     list_display_links = ('name',)

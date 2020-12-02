@@ -25,6 +25,7 @@ class GPUTask(models.Model):
         default=1,
         validators=[MaxValueValidator(8), MinValueValidator(0)]
     )
+    exclusive_gpu = models.BooleanField('独占显卡', default=False)
     memory_requirement = models.PositiveSmallIntegerField('显存需求(MB)', default=0)
     utilization_requirement = models.PositiveSmallIntegerField('利用率需求(%)', default=0)
     assign_server = models.ForeignKey(GPUServer, verbose_name='指定服务器', on_delete=models.CASCADE, blank=True, null=True)
@@ -46,6 +47,7 @@ class GPUTask(models.Model):
             for server in GPUServer.objects.all():
                 available_gpus = server.get_available_gpus(
                     self.gpu_requirement,
+                    self.exclusive_gpu,
                     self.memory_requirement,
                     self.utilization_requirement
                 )
@@ -58,6 +60,7 @@ class GPUTask(models.Model):
         else:
             available_gpus = self.assign_server.get_available_gpus(
                 self.gpu_requirement,
+                self.exclusive_gpu,
                 self.memory_requirement,
                 self.utilization_requirement
             )

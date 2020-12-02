@@ -16,11 +16,11 @@ class GPUServer(models.Model):
     def __str__(self):
         return self.ip
 
-    def get_available_gpus(self, gpu_num, memory, utilization):
+    def get_available_gpus(self, gpu_num, exclusive, memory, utilization):
         available_gpu_list = []
         if self.valid and self.can_use:
             for gpu in self.gpus.all():
-                if gpu.check_available(memory, utilization):
+                if gpu.check_available(exclusive, memory, utilization):
                     available_gpu_list.append(gpu.index)
             if len(available_gpu_list) >= gpu_num:
                 return available_gpu_list
@@ -65,5 +65,8 @@ class GPUInfo(models.Model):
     def utilization_available(self):
         return 100 - self.utilization
 
-    def check_available(self, memory, utilization):
-        return self.free and self.memory_available > memory and self.utilization_available > utilization
+    def check_available(self, exclusive, memory, utilization):
+        if exclusive:
+            return self.complete_free
+        else:
+            return self.free and self.memory_available > memory and self.utilization_available > utilization
