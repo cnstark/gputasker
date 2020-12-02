@@ -4,7 +4,7 @@ import subprocess
 import json
 import time
 
-from gpu_manager.settings import RUNNING_LOG_DIR
+from gpu_tasker.settings import RUNNING_LOG_DIR
 from .models import GPUTask, GPUTaskRunningLog
 
 

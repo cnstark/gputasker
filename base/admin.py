@@ -3,7 +3,7 @@ import os, stat
 from django.contrib import admin
 
 from .models import UserConfig, SystemConfig
-from gpu_manager.settings import PRIVATE_KEY_DIR
+from gpu_tasker.settings import PRIVATE_KEY_DIR
 
 @admin.register(UserConfig)
 class UserConfigAdmin(admin.ModelAdmin):

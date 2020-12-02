@@ -8,7 +8,7 @@ import threading
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gpu_manager.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gpu_tasker.settings")
 django.setup()
 
 from base.utils import get_admin_config
