@@ -8,4 +8,4 @@ private_key
 !*/migrations/__init__.py
 
 *.sqlite3*
-
+.idea
