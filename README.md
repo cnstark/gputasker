@@ -37,39 +37,27 @@ which gpustat  # 查看gpustat路径，稍后会使用
 
 由于开发时间有限，尚未支持一键部署，后续版本迭代会逐步支持。部署环节建议有django基础
 
-* 在Master服务器clone本项目
+1. 在Master服务器clone本项目
 
 ```shell
 git clone https://github.com/cnstark/gputasker.git
 cd gputasker
 ```
 
-* 编辑`gpu_tasker/settings.py`，编辑数据库等django基本设置，如果是单用户使用或机群规模较小时（或者服务器安装MySQL困难），使用sqlite即可。
+2. （可选）编辑`gpu_tasker/settings.py`，编辑数据库等django基本设置，如果是单用户使用或机群规模较小时（或者服务器安装MySQL困难），使用sqlite即可。
 
-* 初始化项目数据库
+3. 运行 `init.sh` 脚本，完成数据库构建、创建管理员等流程。
 
-```shell
-python manage.py makemigrations
-python manage.py migrate
-```
-
-* 创建超级用户
+4. 启动服务，`run.sh` 监听了 IPV4, `run-ipv6.sh`监听了 IPV6，可以根据需要选择。
 
 ```shell
-python manage.py createsuperuser
-```
-
-根据提示输入信息，完成创建。
-
-* 启动服务
-
-```shell
-python manage.py runserver 0:8888
+bash ./run.sh
+# 或者 bash ./run-ipv6.sh
 ```
 
 * 基本设置
 
-访问`http://your_server:8888/admin`，登录管理后台。
+访问`http://your_server:8000/admin`，登录管理后台。
 
 ![home](.assets/home.png)
 
@@ -82,12 +70,6 @@ python manage.py runserver 0:8888
 添加`系统设置`，选择系统管理员，填写gpustat路径。GPU Tasker会使用系统管理员的用户登录Node服务器，执行gpustat获取GPU状态，因此系统管理员用户需要与安装gpustat的用户一致。
 
 ![home](.assets/system_config.png)
-
-* 启动主进程
-
-```shell
-python main.py
-```
 
 ### 添加Node节点
 
