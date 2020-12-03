@@ -32,6 +32,7 @@ class GPUTask(models.Model):
     priority = models.SmallIntegerField('优先级', default=0)
     status = models.SmallIntegerField('状态', choices=STATUS_CHOICE, default=0)
     create_at = models.DateTimeField('创建时间', auto_now_add=True)
+    update_at = models.DateTimeField('更新时间', auto_now=True)
 
     class Meta:
         verbose_name = 'GPU任务'
