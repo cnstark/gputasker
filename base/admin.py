@@ -26,6 +26,10 @@ class UserConfigAdmin(admin.ModelAdmin):
         if not change:
             obj.user = request.user
         obj.server_private_key_path = os.path.join(PRIVATE_KEY_DIR, obj.server_username + '_pk')
+        # format private key
+        obj.server_private_key = obj.server_private_key.replace('\r\n', '\n')
+        if obj.server_private_key[-1] != '\n':
+            obj.server_private_key = obj.server_private_key + '\n'
         with open(obj.server_private_key_path, 'w') as f:
             f.write(obj.server_private_key)
         os.chmod(obj.server_private_key_path, stat.S_IWUSR | stat.S_IREAD)
