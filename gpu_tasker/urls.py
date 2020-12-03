@@ -15,12 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.shortcuts import redirect
 
 
 admin.site.site_header = 'GPU任务管理平台'
 admin.site.site_title = 'GPU任务管理平台'
 
 
+def index_view(request):
+    return redirect('/admin')
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', index_view)
 ]
