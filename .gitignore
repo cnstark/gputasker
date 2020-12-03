@@ -9,3 +9,4 @@ private_key
 
 *.sqlite3*
 
+/.idea/
