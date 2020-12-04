@@ -99,8 +99,10 @@ class GPUTaskAdmin(admin.ModelAdmin):
         for task in queryset:
             new_task = GPUTask(
                 name=task.name + '_copy',
+                user=task.user,
                 workspace=task.workspace,
                 cmd=task.cmd,
+                exclusive_gpu=task.exclusive_gpu,
                 gpu_requirement=task.gpu_requirement,
                 memory_requirement=task.memory_requirement,
                 utilization_requirement=task.utilization_requirement,
