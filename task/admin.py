@@ -5,7 +5,7 @@ from .models import GPUTask, GPUTaskRunningLog
 
 class GPUTaskRunningLogInline(admin.TabularInline):
     model = GPUTaskRunningLog
-    list_display = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
+    fields = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
     readonly_fields = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
 
     show_change_link = True
