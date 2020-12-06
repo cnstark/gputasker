@@ -37,10 +37,11 @@ class GPUServerAdmin(admin.ModelAdmin):
     ordering = ('ip',)
     readonly_fields = ('hostname',)
 
-    # custom css
-    css = {
-        'all': ('css/admin/custom.css', )
-    }
+    class Media:
+        # custom css
+        css = {
+            'all': ('css/admin/custom.css', )
+        }
 
     def has_add_permission(self, request):
         return request.user.is_superuser

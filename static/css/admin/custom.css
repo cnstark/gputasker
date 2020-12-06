@@ -1,0 +1,5 @@
+.inline-group .tabular td.original p {
+    margin-top: -50px;
+    height: 1.2em;
+    display: none!important;
+}
