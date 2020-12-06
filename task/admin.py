@@ -3,13 +3,52 @@ from django.utils.html import format_html
 from .models import GPUTask, GPUTaskRunningLog
 
 
+class GPUTaskRunningLogInline(admin.TabularInline):
+    model = GPUTaskRunningLog
+    list_display = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
+    readonly_fields = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
+
+    show_change_link = True
+
+    verbose_name = '运行记录'
+    verbose_name_plural = '运行记录'
+
+    def get_extra(self, request, obj, **kwargs):
+        return 0
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_change_permission(self, request, obj):
+        return False
+
+    def color_status(self, obj):
+        if obj.status == -1:
+            status = '运行失败'
+            color_code = 'red'
+        elif obj.status == 1:
+            status = '运行中'
+            color_code = '#ecc849'
+        elif obj.status == 2:
+            status = '已完成'
+            color_code = 'green'
+        else:
+            status = '未知状态'
+            color_code = 'red'
+        return format_html('<span style="color:{};">{}</span>', color_code, status)
+
+    color_status.short_description = '状态'
+    color_status.admin_order_field = 'status'
+
+
 @admin.register(GPUTask)
 class GPUTaskAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'workspace', 'cmd', 'gpu_requirement', 'exclusive_gpu', 'memory_requirement', 'utilization_requirement', 'assign_server', 'priority', 'color_status', 'create_at',)
+    list_display = ('id', 'name', 'workspace', 'cmd', 'gpu_requirement', 'exclusive_gpu', 'memory_requirement', 'utilization_requirement', 'assign_server', 'priority', 'color_status', 'create_at', 'update_at',)
     list_filter = ('gpu_requirement', 'status', 'assign_server', 'priority')
     search_fields = ('name', 'status',)
     list_display_links = ('name',)
-    readonly_fields = ('create_at', 'user',)
+    readonly_fields = ('create_at', 'update_at', 'user',)
+    inlines = (GPUTaskRunningLogInline,)
     actions = ('copy_task', 'restart_task',)
 
     def get_queryset(self, request):
@@ -20,7 +59,7 @@ class GPUTaskAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return True
-    
+
     def save_model(self, request, obj, form, change):
         if not change:
             obj.user = request.user
@@ -60,8 +99,10 @@ class GPUTaskAdmin(admin.ModelAdmin):
         for task in queryset:
             new_task = GPUTask(
                 name=task.name + '_copy',
+                user=task.user,
                 workspace=task.workspace,
                 cmd=task.cmd,
+                exclusive_gpu=task.exclusive_gpu,
                 gpu_requirement=task.gpu_requirement,
                 memory_requirement=task.memory_requirement,
                 utilization_requirement=task.utilization_requirement,
@@ -112,7 +153,7 @@ class GPUTaskRunningLogAdmin(admin.ModelAdmin):
         for running_task in queryset:
             running_task.delete_log_file()
             running_task.delete()
-    
+
     def color_status(self, obj):
         if obj.status == -1:
             status = '运行失败'
