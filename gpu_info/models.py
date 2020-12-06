@@ -67,6 +67,6 @@ class GPUInfo(models.Model):
 
     def check_available(self, exclusive, memory, utilization):
         if exclusive:
-            return self.complete_free
+            return self.free and self.complete_free
         else:
             return self.free and self.memory_available > memory and self.utilization_available > utilization

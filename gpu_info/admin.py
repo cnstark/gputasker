@@ -7,11 +7,13 @@ class GPUInfoInline(admin.TabularInline):
     fields = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
     readonly_fields = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
 
+    show_change_link = True
+
     def memory_usage(self, obj):
         memory_total = obj.memory_total
         memory_used = obj.memory_used
         return '{:d} / {:d} MB ({:.0f}%)'.format(memory_used, memory_total, memory_used / memory_total * 100)
-    
+
     memory_usage.short_description = '显存占用率'
 
     def get_extra(self, request, obj, **kwargs):
