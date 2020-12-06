@@ -2,4 +2,11 @@
     position: relative;
     margin-top: 1rem!important;
     width: 100%;
+    font-size: 0;
+    overflow: visible;
+}
+
+.inline-group .tabular td.original p a{
+    font-size: 10px;
+    padding-left: 10px;
 }
