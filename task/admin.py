@@ -51,6 +51,12 @@ class GPUTaskAdmin(admin.ModelAdmin):
     inlines = (GPUTaskRunningLogInline,)
     actions = ('copy_task', 'restart_task',)
 
+    class Media:
+        # custom css
+        css = {
+            'all': ('css/admin/custom.css', )
+        }
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:

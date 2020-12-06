@@ -1,5 +1,5 @@
 .inline-group .tabular td.original p {
-    margin-top: -50px;
-    height: 1.2em;
-    display: none!important;
+    position: relative;
+    margin-top: 1rem!important;
+    width: 100%;
 }
