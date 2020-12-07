@@ -1,3 +1,5 @@
+import json
+
 from django.db import models
 
 
@@ -70,3 +72,20 @@ class GPUInfo(models.Model):
             return self.free and self.complete_free
         else:
             return self.free and self.memory_available > memory and self.utilization_available > utilization
+
+    def usernames(self):
+        r"""
+        convert processes string to usernames string array.
+        :return: string array of usernames.
+        """
+        if self.processes != '':
+            arr = self.processes.split('\n')
+            # only show first two usernames
+            username_arr = [json.loads(item)['username'] for item in arr[:2]]
+            res = ', '.join(username_arr)
+            # others use ... to note
+            if len(arr) > 2:
+                res = res + ', ...'
+            return res
+        else:
+            return '-'

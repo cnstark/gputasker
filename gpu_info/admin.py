@@ -4,10 +4,13 @@ from .models import GPUServer, GPUInfo
 
 class GPUInfoInline(admin.TabularInline):
     model = GPUInfo
-    fields = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
-    readonly_fields = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
+    fields = ('index', 'name', 'utilization', 'memory_usage', 'usernames', 'free', 'complete_free', 'update_at')
+    readonly_fields = ('index', 'name', 'utilization', 'memory_usage', 'usernames', 'free', 'complete_free', 'update_at')
 
     show_change_link = True
+
+    def usernames(self, obj):
+        return obj.usernames()
 
     def memory_usage(self, obj):
         memory_total = obj.memory_total
@@ -15,6 +18,7 @@ class GPUInfoInline(admin.TabularInline):
         return '{:d} / {:d} MB ({:.0f}%)'.format(memory_used, memory_total, memory_used / memory_total * 100)
 
     memory_usage.short_description = '显存占用率'
+    usernames.short_description = '使用者'
 
     def get_extra(self, request, obj, **kwargs):
         return 0
@@ -51,12 +55,15 @@ class GPUServerAdmin(admin.ModelAdmin):
 
 @admin.register(GPUInfo)
 class GPUInfoAdmin(admin.ModelAdmin):
-    list_display = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
+    list_display = ('index', 'name', 'utilization', 'memory_usage', 'server', 'usernames', 'free', 'complete_free', 'update_at')
     list_filter = ('server', 'name', 'free', 'complete_free')
     search_fields = ('uuid', 'name', 'memory_used', 'server',)
     list_display_links = ('name',)
     ordering = ('server', 'index')
     readonly_fields = ('uuid', 'name', 'index', 'utilization', 'memory_total', 'memory_used','server', 'processes', 'free', 'complete_free', 'update_at')
+
+    def usernames(self, obj):
+        return obj.usernames()
 
     def has_add_permission(self, request):
         return False
@@ -67,3 +74,4 @@ class GPUInfoAdmin(admin.ModelAdmin):
         return '{:d} / {:d} MB ({:.0f}%)'.format(memory_used, memory_total, memory_used / memory_total * 100)
     
     memory_usage.short_description = '显存占用率'
+    usernames.short_description = '使用者'
