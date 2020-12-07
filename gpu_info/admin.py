@@ -63,8 +63,13 @@ class GPUInfoAdmin(admin.ModelAdmin):
     def usernames(self, obj):
         if obj.processes != '':
             arr = obj.processes.split('\n')
-            username_arr = [json.loads(item)['username'] for item in arr]
-            return ', '.join(username_arr)
+            # only show first two usernames
+            username_arr = [json.loads(item)['username'] for item in arr[:2]]
+            res = ', '.join(username_arr)
+            # others use ... to note
+            if len(arr) > 2:
+                res = res + '...'
+            return res
         else:
             return '-'
 
