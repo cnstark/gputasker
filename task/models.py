@@ -19,7 +19,7 @@ class GPUTask(models.Model):
     name = models.CharField('任务名称', max_length=100)
     user = models.ForeignKey(User, verbose_name='用户', on_delete=models.CASCADE, related_name='tasks')
     workspace = models.CharField('工作目录', max_length=200)
-    cmd = models.CharField('命令', max_length=200)
+    cmd = models.TextField('命令')
     gpu_requirement = models.PositiveSmallIntegerField(
         'GPU数量需求',
         default=1,

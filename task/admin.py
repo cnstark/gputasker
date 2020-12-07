@@ -69,6 +69,10 @@ class GPUTaskAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not change:
             obj.user = request.user
+        # format cmd
+        obj.cmd = obj.cmd.replace('\r\n', '\n')
+        if obj.cmd[-1] != '\n':
+            obj.cmd = obj.cmd + '\n'
         super().save_model(request, obj, form, change)
 
     def color_status(self, obj):
