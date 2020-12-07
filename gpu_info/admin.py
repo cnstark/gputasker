@@ -55,7 +55,7 @@ class GPUServerAdmin(admin.ModelAdmin):
 
 @admin.register(GPUInfo)
 class GPUInfoAdmin(admin.ModelAdmin):
-    list_display = ('index', 'name', 'utilization', 'memory_usage', 'server', 'usernames', 'free', 'complete_free', 'update_at')
+    list_display = ('index', 'name', 'server', 'utilization', 'memory_usage', 'usernames', 'free', 'complete_free', 'update_at')
     list_filter = ('server', 'name', 'free', 'complete_free')
     search_fields = ('uuid', 'name', 'memory_used', 'server',)
     list_display_links = ('name',)
