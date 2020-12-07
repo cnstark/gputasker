@@ -5,6 +5,25 @@ import json
 from .models import GPUServer, GPUInfo
 
 
+def processes_str_to_usernames(processes):
+    r"""
+    convert processes string to usernames string array.
+    :param processes: string that stores current processes' info
+    :return: string array of usernames.
+    """
+    if processes != '':
+        arr = processes.split('\n')
+        # only show first two usernames
+        username_arr = [json.loads(item)['username'] for item in arr[:2]]
+        res = ', '.join(username_arr)
+        # others use ... to note
+        if len(arr) > 2:
+            res = res + '...'
+        return res
+    else:
+        return '-'
+
+
 def ssh_execute(host, user, exec_cmd, private_key_path=None):
     if private_key_path is None:
         cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)

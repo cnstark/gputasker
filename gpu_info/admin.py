@@ -2,14 +2,18 @@ import json
 
 from django.contrib import admin
 from .models import GPUServer, GPUInfo
+from .utils import processes_str_to_usernames
 
 
 class GPUInfoInline(admin.TabularInline):
     model = GPUInfo
-    fields = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
-    readonly_fields = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
+    fields = ('index', 'name', 'usernames', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
+    readonly_fields = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at', 'usernames')
 
     show_change_link = True
+
+    def usernames(self, obj):
+        return processes_str_to_usernames(obj.processes)
 
     def memory_usage(self, obj):
         memory_total = obj.memory_total
@@ -17,6 +21,7 @@ class GPUInfoInline(admin.TabularInline):
         return '{:d} / {:d} MB ({:.0f}%)'.format(memory_used, memory_total, memory_used / memory_total * 100)
 
     memory_usage.short_description = '显存占用率'
+    usernames.short_description = '占用者'
 
     def get_extra(self, request, obj, **kwargs):
         return 0
@@ -61,17 +66,7 @@ class GPUInfoAdmin(admin.ModelAdmin):
     readonly_fields = ('uuid', 'name', 'index', 'utilization', 'memory_total', 'memory_used','server', 'processes', 'free', 'complete_free', 'update_at')
 
     def usernames(self, obj):
-        if obj.processes != '':
-            arr = obj.processes.split('\n')
-            # only show first two usernames
-            username_arr = [json.loads(item)['username'] for item in arr[:2]]
-            res = ', '.join(username_arr)
-            # others use ... to note
-            if len(arr) > 2:
-                res = res + '...'
-            return res
-        else:
-            return '-'
+        return processes_str_to_usernames(obj.processes)
 
     def has_add_permission(self, request):
         return False
