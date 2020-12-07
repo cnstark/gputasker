@@ -1,3 +1,5 @@
+import json
+
 from django.contrib import admin
 from .models import GPUServer, GPUInfo
 
@@ -51,12 +53,20 @@ class GPUServerAdmin(admin.ModelAdmin):
 
 @admin.register(GPUInfo)
 class GPUInfoAdmin(admin.ModelAdmin):
-    list_display = ('index', 'name', 'utilization', 'memory_usage', 'server', 'free', 'complete_free', 'update_at')
+    list_display = ('index', 'name', 'utilization', 'memory_usage', 'server', 'usernames', 'free', 'complete_free', 'update_at')
     list_filter = ('server', 'name', 'free', 'complete_free')
     search_fields = ('uuid', 'name', 'memory_used', 'server',)
     list_display_links = ('name',)
     ordering = ('server', 'index')
     readonly_fields = ('uuid', 'name', 'index', 'utilization', 'memory_total', 'memory_used','server', 'processes', 'free', 'complete_free', 'update_at')
+
+    def usernames(self, obj):
+        if obj.processes != '':
+            arr = obj.processes.split('\n')
+            username_arr = [json.loads(item)['username'] for item in arr]
+            return ', '.join(username_arr)
+        else:
+            return '-'
 
     def has_add_permission(self, request):
         return False
@@ -67,3 +77,4 @@ class GPUInfoAdmin(admin.ModelAdmin):
         return '{:d} / {:d} MB ({:.0f}%)'.format(memory_used, memory_total, memory_used / memory_total * 100)
     
     memory_usage.short_description = '显存占用率'
+    usernames.short_description = '占用者'
