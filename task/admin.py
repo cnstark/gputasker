@@ -5,7 +5,7 @@ from .models import GPUTask, GPUTaskRunningLog
 
 class GPUTaskRunningLogInline(admin.TabularInline):
     model = GPUTaskRunningLog
-    list_display = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
+    fields = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
     readonly_fields = ('index', 'server', 'gpus', 'log_file_path', 'color_status', 'start_at', 'update_at',)
 
     show_change_link = True
@@ -50,6 +50,12 @@ class GPUTaskAdmin(admin.ModelAdmin):
     readonly_fields = ('create_at', 'update_at', 'user',)
     inlines = (GPUTaskRunningLogInline,)
     actions = ('copy_task', 'restart_task',)
+
+    class Media:
+        # custom css
+        css = {
+            'all': ('css/admin/custom.css', )
+        }
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

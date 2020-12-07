@@ -91,6 +91,7 @@ class GPUTaskRunningLog(models.Model):
     update_at = models.DateTimeField('更新时间', auto_now=True)
 
     class Meta:
+        ordering = ('-id',)
         verbose_name = 'GPU任务运行记录'
         verbose_name_plural = 'GPU任务运行记录'
 
