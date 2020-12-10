@@ -9,6 +9,7 @@ from .models import GPUTask, GPUTaskRunningLog
 
 
 def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
+    exec_cmd = exec_cmd.replace('$', '\\$')
     if private_key_path is None:
         cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
     else:
@@ -41,8 +42,8 @@ class RemoteProcess:
 
 class RemoteGPUProcess(RemoteProcess):
     def __init__(self, user, host, gpus, cmd, workspace="~", private_key_path=None, output_file=None):
-        env = 'CUDA_VISIBLE_DEVICES={}'.format(','.join(map(str, gpus)))
-        cmd = '{} bash -c \'{}\''.format(env, cmd)
+        env = 'export CUDA_VISIBLE_DEVICES={}'.format(','.join(map(str, gpus)))
+        cmd = 'bash -c \'{}\n{}\n\''.format(env, cmd)
         super(RemoteGPUProcess, self).__init__(user, host, cmd, workspace, private_key_path, output_file)
 
 
