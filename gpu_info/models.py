@@ -32,10 +32,10 @@ class GPUServer(models.Model):
             return None
     
     def set_gpus_busy(self, gpu_list):
-        self.gpus.filter(index__in=gpu_list).update(free=False)
+        self.gpus.filter(index__in=gpu_list).update(use_by_self=True)
 
     def set_gpus_free(self, gpu_list):
-        self.gpus.filter(index__in=gpu_list).update(free=True)
+        self.gpus.filter(index__in=gpu_list).update(use_by_self=False)
 
 
 class GPUInfo(models.Model):
@@ -47,7 +47,7 @@ class GPUInfo(models.Model):
     memory_used = models.PositiveIntegerField('已用显存')
     processes = models.TextField('进程')
     server = models.ForeignKey(GPUServer, verbose_name='服务器', on_delete=models.CASCADE, related_name='gpus')
-    free = models.BooleanField('是否可用', default=True)
+    use_by_self = models.BooleanField('是否被gputasker进程占用', default=False)
     complete_free = models.BooleanField('完全空闲', default=False)
     update_at = models.DateTimeField('更新时间', auto_now=True)
 
@@ -69,9 +69,9 @@ class GPUInfo(models.Model):
 
     def check_available(self, exclusive, memory, utilization):
         if exclusive:
-            return self.free and self.complete_free
+            return not self.use_by_self and self.complete_free
         else:
-            return self.free and self.memory_available > memory and self.utilization_available > utilization
+            return not self.use_by_self and self.memory_available > memory and self.utilization_available > utilization
 
     def usernames(self):
         r"""

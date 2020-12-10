@@ -4,8 +4,8 @@ from .models import GPUServer, GPUInfo
 
 class GPUInfoInline(admin.TabularInline):
     model = GPUInfo
-    fields = ('index', 'name', 'utilization', 'memory_usage', 'usernames', 'free', 'complete_free', 'update_at')
-    readonly_fields = ('index', 'name', 'utilization', 'memory_usage', 'usernames', 'free', 'complete_free', 'update_at')
+    fields = ('index', 'name', 'utilization', 'memory_usage', 'usernames', 'complete_free', 'update_at')
+    readonly_fields = ('index', 'name', 'utilization', 'memory_usage', 'usernames', 'complete_free', 'update_at')
 
     show_change_link = True
 
@@ -55,12 +55,12 @@ class GPUServerAdmin(admin.ModelAdmin):
 
 @admin.register(GPUInfo)
 class GPUInfoAdmin(admin.ModelAdmin):
-    list_display = ('index', 'name', 'server', 'utilization', 'memory_usage', 'usernames', 'free', 'complete_free', 'update_at')
-    list_filter = ('server', 'name', 'free', 'complete_free')
+    list_display = ('index', 'name', 'server', 'utilization', 'memory_usage', 'usernames', 'complete_free', 'update_at')
+    list_filter = ('server', 'name', 'complete_free')
     search_fields = ('uuid', 'name', 'memory_used', 'server',)
     list_display_links = ('name',)
     ordering = ('server', 'index')
-    readonly_fields = ('uuid', 'name', 'index', 'utilization', 'memory_total', 'memory_used','server', 'processes', 'free', 'complete_free', 'update_at')
+    readonly_fields = ('uuid', 'name', 'index', 'utilization', 'memory_total', 'memory_used','server', 'processes', 'use_by_self', 'complete_free', 'update_at')
 
     def usernames(self, obj):
         return obj.usernames()
