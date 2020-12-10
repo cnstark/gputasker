@@ -1,0 +1,11 @@
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 465
+
+EMAIL_HOST_USER = 'xxx@163.com'
+EMAIL_HOST_PASSWORD = 'xxx'
+
+EMAIL_USE_SSL = True
+EMAIL_USE_LOCALTIME = True
+DEFAULT_FROM_EMAIL = 'GPUTasker<{}>'.format(EMAIL_HOST_USER)
+SERVER_EMAIL = EMAIL_HOST_USER
