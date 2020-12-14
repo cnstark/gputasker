@@ -4,12 +4,16 @@ import subprocess
 import json
 import time
 import traceback
+import logging
 
 from gpu_tasker.settings import RUNNING_LOG_DIR
 from .models import GPUTask, GPUTaskRunningLog
 
 from notification.email_notification import \
     send_task_start_email, send_task_finish_email, send_task_fail_email
+
+
+task_logger = logging.getLogger('django.task')
 
 
 def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
@@ -24,7 +28,7 @@ def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
 class RemoteProcess:
     def __init__(self, user, host, cmd, workspace="~", private_key_path=None, output_file=None):
         self.cmd = generate_ssh_cmd(host, user, "cd {} && {}".format(workspace, cmd), private_key_path)
-        print(self.cmd)
+        task_logger.info(self.cmd)
         if output_file is not None:
             self.output_file = output_file
             with open(self.output_file, "wb") as out:
@@ -82,7 +86,7 @@ def run_task(task, available_server):
             log_file_path
         )
         pid = process.pid()
-        print('Task {:d}-{:s} is running, pid: {:d}'.format(task.id, task.name, pid))
+        task_logger.info('Task {:d}-{:s} is running, pid: {:d}'.format(task.id, task.name, pid))
 
         # save process status
         running_log.pid = pid
@@ -97,7 +101,7 @@ def run_task(task, available_server):
 
         # wait for return
         return_code = process.get_return_code()
-        print('Task {:d}-{:s} stopped, return_code: {:d}'.format(task.id, task.name, return_code))
+        task_logger.info('Task {:d}-{:s} stopped, return_code: {:d}'.format(task.id, task.name, return_code))
 
         # save process status
         running_log.status = 2 if return_code == 0 else -1
@@ -112,7 +116,7 @@ def run_task(task, available_server):
             send_task_fail_email(running_log)
     except Exception:
         es = traceback.format_exc()
-        print(es)
+        task_logger.error(es)
         running_log.status = -1
         running_log.save()
         task.status = -1
