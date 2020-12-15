@@ -138,3 +138,9 @@ if not os.path.isdir(RUNNING_LOG_DIR):
 
 if not os.path.isdir(PRIVATE_KEY_DIR):
     os.makedirs(PRIVATE_KEY_DIR)
+
+try:
+    from gpu_tasker.email_settings import *
+    EMAIL_NOTIFICATION = True
+except ModuleNotFoundError:
+    EMAIL_NOTIFICATION = False

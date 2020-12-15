@@ -7,6 +7,9 @@ import time
 from gpu_tasker.settings import RUNNING_LOG_DIR
 from .models import GPUTask, GPUTaskRunningLog
 
+from notification.email_notification import \
+    send_task_start_email, send_task_finish_email, send_task_fail_email
+
 
 def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
     exec_cmd = exec_cmd.replace('$', '\\$')
@@ -80,8 +83,13 @@ def run_task(task, available_server):
     running_log.save()
     task.status = 1
     task.save()
+    send_task_start_email(running_log)
     return_code = process.get_return_code()
     print('Task {:d}-{:s} stopped, return_code: {:d}'.format(task.id, task.name, return_code))
+    if return_code == 0:
+        send_task_finish_email(running_log)
+    else:
+        send_task_fail_email(running_log)
     server.set_gpus_free(gpus)
     server.save()
     running_log.status = 2 if return_code == 0 else -1

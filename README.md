@@ -129,6 +129,51 @@ source venv/pytorch/bin/activate && python train.py
 
 任务运行后可以通过`GPU任务运行记录`查看任务状态与Log。
 
+## 通知设置
+
+GPUTasker支持邮件通知，任务开始运行和结束时向用户发送邮件提醒。
+
+### 开启邮箱SMTP功能
+
+进入邮箱后台，开启SMTP功能，并获取SMTP密钥。不同邮件服务商配置方式不同，具体开启方法参考邮箱帮助。
+
+### 配置邮件通知
+
+复制`email_settings_sample.py`为`email_settings.py`。
+
+```shell
+cd gpu_tasker
+cp email_settings_sample.py email_settings.py
+```
+
+编辑`email_settings.py`，填写SMTP服务器、端口、邮箱名和密码：
+
+```python
+# 以163邮箱为例
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# SMTP服务器
+EMAIL_HOST = 'smtp.163.com'
+# SMTP服务器端口
+EMAIL_PORT = 465
+
+# 邮箱名
+EMAIL_HOST_USER = 'xxx@163.com'
+# SMTP密钥（部分邮箱与邮箱密码相同）
+EMAIL_HOST_PASSWORD = 'xxx'
+
+EMAIL_USE_SSL = True
+EMAIL_USE_LOCALTIME = True
+DEFAULT_FROM_EMAIL = 'GPUTasker<{}>'.format(EMAIL_HOST_USER)
+SERVER_EMAIL = EMAIL_HOST_USER
+```
+
+### 配置收信邮箱
+
+收信邮箱为Django用户`电子邮件地址`，在后台进行配置。
+
+![user_email](.assets/user_email.png)
+
 ## 写在后面
 
 在一次急需跑一个程序却在实验室几十台服务器上找不到一块显卡时萌生了这个想法，花半天时间写了这个项目的第一版，在显卡空闲时“抢”显卡执行我的程序，当时就决定开源，造福像我一样抢不到显卡的人。使用过程中经过了几天的完善，逐渐变成了一个支持多用户的GPU的任务调度工具，也更希望任务可以被有序调度而不是所有人疯狂的抢，这也是项目未来的愿景。
