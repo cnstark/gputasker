@@ -109,10 +109,23 @@ python main.py
 选项说明
 
 * 工作目录：执行命令时所在的工作目录。
-* 命令：执行的命令。如果需要执行多条命令，请用`&&`连接，如：
+* 命令：执行的命令。支持多行命令，如：
 
 ```shell
-source venv/pytorch/bin/activate && python train.py
+source venv/pytorch/bin/activate
+python train.py
+```
+
+注意：使用conda环境时，由于ssh远程执行无法获取conda环境变量导致`conda activate`失败，需要先激活conda再激活虚拟环境。或者使用`python`绝对路径。例如：
+
+```shell
+source /path/to/anaconda3/bin/activate
+conda activate pytorch
+python train.py
+
+# 或
+
+/path/to/anaconda3/envs/pytorch/bin/python train.py
 ```
 
 * GPU数量需求：任务所需的GPU数量。当任务被调度时，会根据所需GPU数量自动设置`CUDA_VISIBLE_DEVICES`环境变量，因此任务命令中不要手动设置`CUDA_VISIBLE_DEVICES`，避免调度失败。
@@ -173,6 +186,24 @@ SERVER_EMAIL = EMAIL_HOST_USER
 收信邮箱为Django用户`电子邮件地址`，在后台进行配置。
 
 ![user_email](.assets/user_email.png)
+
+## 更新GPUTasker
+
+GPUTasker可能包含数据表的改动，更新后请务必更新数据表以及**重新启动main.py**。
+
+```shell
+# 拉取最新代码
+git pull
+
+# 更新数据表
+python manage.py makemigrations
+python manage.py migrate
+
+# 重新启动main.py
+# 1. CTRL + C结束main.py
+# 2. 重新启动
+python main.py
+```
 
 ## QQ交流群
 
