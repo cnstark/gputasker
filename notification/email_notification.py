@@ -1,3 +1,5 @@
+import traceback
+
 from django.core.mail import send_mail
 
 from gpu_tasker.settings import EMAIL_NOTIFICATION
@@ -56,8 +58,13 @@ TASK_FAIL_NOTIFICATION_TEMPLATE = \
 
 def send_email(address, title, content):
     if EMAIL_NOTIFICATION:
-        from gpu_tasker.settings import DEFAULT_FROM_EMAIL
-        send_mail(title, content, DEFAULT_FROM_EMAIL, [address], fail_silently=False)
+        try:
+            from gpu_tasker.settings import DEFAULT_FROM_EMAIL
+            send_mail(title, content, DEFAULT_FROM_EMAIL, [address], fail_silently=False)
+        except Exception:
+            es = traceback.format_exc()
+            print('Send email fail')
+            print(es)
 
 
 def check_email_config(func):

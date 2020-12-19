@@ -3,6 +3,7 @@ import signal
 import subprocess
 import json
 import time
+import traceback
 
 from gpu_tasker.settings import RUNNING_LOG_DIR
 from .models import GPUTask, GPUTaskRunningLog
@@ -58,41 +59,67 @@ def run_task(task, available_server):
         RUNNING_LOG_DIR,
         '{:d}_{:s}_{:s}_{:d}_{:d}.log'.format(task.id, task.name, server.ip, index, int(time.time()))
     )
-    process = RemoteGPUProcess(
-        task.user.config.server_username,
-        server.ip,
-        gpus,
-        task.cmd,
-        task.workspace,
-        task.user.config.server_private_key_path,
-        log_file_path
-    )
-    pid = process.pid()
-    print('Task {:d}-{:s} is running, pid: {:d}'.format(task.id, task.name, pid))
-    server.set_gpus_busy(gpus)
-    server.save()
+    # create running_log
     running_log = GPUTaskRunningLog(
         index=index,
         task=task,
         server=server,
-        pid=pid,
+        pid=-1,
         gpus=','.join(map(str, gpus)),
         log_file_path=log_file_path,
         status=1
     )
     running_log.save()
-    task.status = 1
-    task.save()
-    send_task_start_email(running_log)
-    return_code = process.get_return_code()
-    print('Task {:d}-{:s} stopped, return_code: {:d}'.format(task.id, task.name, return_code))
-    if return_code == 0:
-        send_task_finish_email(running_log)
-    else:
-        send_task_fail_email(running_log)
-    server.set_gpus_free(gpus)
-    server.save()
-    running_log.status = 2 if return_code == 0 else -1
-    running_log.save()
-    task.status = 2 if return_code == 0 else -1
-    task.save()
+    try:
+        # run process
+        process = RemoteGPUProcess(
+            task.user.config.server_username,
+            server.ip,
+            gpus,
+            task.cmd,
+            task.workspace,
+            task.user.config.server_private_key_path,
+            log_file_path
+        )
+        pid = process.pid()
+        print('Task {:d}-{:s} is running, pid: {:d}'.format(task.id, task.name, pid))
+
+        # save process status
+        running_log.pid = pid
+        running_log.save()
+        server.set_gpus_busy(gpus)
+        server.save()
+        task.status = 1
+        task.save()
+
+        # send email
+        send_task_start_email(running_log)
+
+        # wait for return
+        return_code = process.get_return_code()
+        print('Task {:d}-{:s} stopped, return_code: {:d}'.format(task.id, task.name, return_code))
+
+        # save process status
+        running_log.status = 2 if return_code == 0 else -1
+        running_log.save()
+        task.status = 2 if return_code == 0 else -1
+        task.save()
+
+        # send email
+        if return_code == 0:
+            send_task_finish_email(running_log)
+        else:
+            send_task_fail_email(running_log)
+    except Exception:
+        es = traceback.format_exc()
+        print(es)
+        running_log.status = -1
+        running_log.save()
+        task.status = -1
+        task.save()
+        with open(log_file_path, 'a') as f:
+            f.write('\n')
+            f.write(es)
+    finally:
+        server.set_gpus_free(gpus)
+        server.save()
