@@ -28,7 +28,7 @@ def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
 class RemoteProcess:
     def __init__(self, user, host, cmd, workspace="~", private_key_path=None, output_file=None):
         self.cmd = generate_ssh_cmd(host, user, "cd {} && {}".format(workspace, cmd), private_key_path)
-        task_logger.info(self.cmd)
+        task_logger.info('cmd:\n' + self.cmd)
         if output_file is not None:
             self.output_file = output_file
             with open(self.output_file, "wb") as out:
