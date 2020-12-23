@@ -19,9 +19,9 @@ task_logger = logging.getLogger('django.task')
 def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
     exec_cmd = exec_cmd.replace('$', '\\$')
     if private_key_path is None:
-        cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
+        cmd = "ssh -tt -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
     else:
-        cmd = "ssh -o StrictHostKeyChecking=no -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
+        cmd = "ssh -tt -o StrictHostKeyChecking=no -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
     return cmd
 
 
@@ -32,7 +32,7 @@ class RemoteProcess:
         if output_file is not None:
             self.output_file = output_file
             with open(self.output_file, "wb") as out:
-                self.proc = subprocess.Popen(self.cmd, shell=True, stdout=out, stderr=out, bufsize=1)
+                self.proc = subprocess.Popen(self.cmd, shell=True, stdin=subprocess.PIPE, stdout=out, stderr=out, bufsize=1)
         else:
             self.proc = subprocess.Popen(self.cmd, shell=True)
 
@@ -41,7 +41,8 @@ class RemoteProcess:
 
     def kill(self):
         # os.killpg(os.getpgid(self.proc.pid), signal.SIGKILL)
-        os.kill(self.proc.pid, signal.SIGKILL)
+        # os.kill(self.proc.pid, signal.SIGKILL)
+        self.proc.send_signal(signal.SIGINT)
 
     def get_return_code(self):
         self.proc.wait()
