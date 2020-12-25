@@ -3,6 +3,7 @@ __pycache__
 
 running_log
 private_key
+server_log
 
 */migrations/*
 !*/migrations/__init__.py

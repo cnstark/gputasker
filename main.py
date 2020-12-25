@@ -5,6 +5,7 @@ import json
 import time
 from datetime import datetime
 import threading
+import logging
 
 import django
 
@@ -15,7 +16,9 @@ from base.utils import get_admin_config
 from task.models import GPUTask
 from task.utils import run_task
 from gpu_info.models import GPUServer
-from gpu_info.utils import GPUInfoUpdater, add_hostname
+from gpu_info.utils import GPUInfoUpdater
+
+task_logger = logging.getLogger('django.task')
 
 
 if __name__ == '__main__':
@@ -23,10 +26,9 @@ if __name__ == '__main__':
 
     gpu_updater = GPUInfoUpdater(server_username, gpustat_path, server_private_key_path)
     while True:
-        print('{:s}, Running processes: {:d}'.format(
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            threading.active_count() - 1)
-        )
+        task_logger.info('Running processes: {:d}'.format(
+            threading.active_count() - 1
+        ))
         start_time = time.time()
         gpu_updater.update_gpu_info()
         for task in GPUTask.objects.filter(status=0):

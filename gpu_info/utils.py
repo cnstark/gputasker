@@ -1,8 +1,11 @@
 import os
 import subprocess
 import json
+import logging
 
 from .models import GPUServer, GPUInfo
+
+task_logger = logging.getLogger('django.task')
 
 
 def ssh_execute(host, user, exec_cmd, private_key_path=None):
@@ -88,6 +91,6 @@ class GPUInfoUpdater:
                         gpu_info.processes = '\n'.join(map(lambda x: json.dumps(x), gpu['processes']))
                         gpu_info.save()
             except subprocess.CalledProcessError:
-                print('Update ' + server.ip + ' failed')
+                task_logger.error('Update ' + server.ip + ' failed')
                 server.valid = False
                 server.save()
