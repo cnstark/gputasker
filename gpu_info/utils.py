@@ -13,7 +13,7 @@ def ssh_execute(host, user, exec_cmd, private_key_path=None):
         cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
     else:
         cmd = "ssh -o StrictHostKeyChecking=no -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
-    return subprocess.check_output(cmd, timeout=10, shell=True)
+    return subprocess.check_output(cmd, timeout=60, shell=True)
 
 
 def get_hostname(host, user, private_key_path=None):
