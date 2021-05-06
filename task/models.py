@@ -99,7 +99,7 @@ class GPUTaskRunningLog(models.Model):
         return self.task.name + '-' + str(self.index)
 
     def kill(self):
-        os.kill(self.pid, signal.SIGKILL)
+        os.kill(self.pid, signal.SIGINT)
     
     def delete_log_file(self):
         if os.path.isfile(self.log_file_path):
