@@ -13,7 +13,7 @@ def ssh_execute(host, user, exec_cmd, private_key_path=None):
         cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
     else:
         cmd = "ssh -o StrictHostKeyChecking=no -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
-    return subprocess.check_output(cmd, shell=True)
+    return subprocess.check_output(cmd, timeout=10, shell=True)
 
 
 def get_hostname(host, user, private_key_path=None):
@@ -90,7 +90,7 @@ class GPUInfoUpdater:
                         gpu_info.complete_free = len(gpu['processes']) == 0
                         gpu_info.processes = '\n'.join(map(lambda x: json.dumps(x), gpu['processes']))
                         gpu_info.save()
-            except subprocess.CalledProcessError:
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 task_logger.error('Update ' + server.ip + ' failed')
                 server.valid = False
                 server.save()
