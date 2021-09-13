@@ -55,7 +55,7 @@ class GPUServerAdmin(admin.ModelAdmin):
 
 @admin.register(GPUInfo)
 class GPUInfoAdmin(admin.ModelAdmin):
-    list_display = ('index', 'name', 'server', 'utilization', 'memory_usage', 'usernames', 'complete_free', 'update_at')
+    list_display = ('index', 'name', 'server', 'utilization', 'memory_usage', 'usernames', 'valid', 'complete_free', 'update_at')
     list_filter = ('server', 'name', 'complete_free')
     search_fields = ('uuid', 'name', 'memory_used', 'server',)
     list_display_links = ('name',)
@@ -72,6 +72,10 @@ class GPUInfoAdmin(admin.ModelAdmin):
         memory_total = obj.memory_total
         memory_used = obj.memory_used
         return '{:d} / {:d} MB ({:.0f}%)'.format(memory_used, memory_total, memory_used / memory_total * 100)
-    
+
+    def valid(self, obj):
+        return obj.server.valid
+
     memory_usage.short_description = '显存占用率'
     usernames.short_description = '使用者'
+    valid.short_description = '是否可用'
