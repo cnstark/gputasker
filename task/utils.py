@@ -16,18 +16,18 @@ from notification.email_notification import \
 task_logger = logging.getLogger('django.task')
 
 
-def generate_ssh_cmd(host, user, exec_cmd, private_key_path=None):
+def generate_ssh_cmd(host, user, exec_cmd, port=22, private_key_path=None):
     exec_cmd = exec_cmd.replace('$', '\\$')
     if private_key_path is None:
-        cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
+        cmd = "ssh -o StrictHostKeyChecking=no -p {:d} {}@{} \"{}\"".format(port, user, host, exec_cmd)
     else:
-        cmd = "ssh -o StrictHostKeyChecking=no -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
+        cmd = "ssh -o StrictHostKeyChecking=no -p {:d} -i {} {}@{} \"{}\"".format(port, private_key_path, user, host, exec_cmd)
     return cmd
 
 
 class RemoteProcess:
-    def __init__(self, user, host, cmd, workspace="~", private_key_path=None, output_file=None):
-        self.cmd = generate_ssh_cmd(host, user, "cd {} && {}".format(workspace, cmd), private_key_path)
+    def __init__(self, user, host, cmd, workspace="~", port=22, private_key_path=None, output_file=None):
+        self.cmd = generate_ssh_cmd(host, user, "cd {} && {}".format(workspace, cmd), port, private_key_path)
         task_logger.info('cmd:\n' + self.cmd)
         if output_file is not None:
             self.output_file = output_file
@@ -49,10 +49,10 @@ class RemoteProcess:
 
 
 class RemoteGPUProcess(RemoteProcess):
-    def __init__(self, user, host, gpus, cmd, workspace="~", private_key_path=None, output_file=None):
+    def __init__(self, user, host, gpus, cmd, workspace="~", port=22, private_key_path=None, output_file=None):
         env = 'export CUDA_VISIBLE_DEVICES={}'.format(','.join(map(str, gpus)))
         cmd = 'bash -c \'{}\n{}\n\''.format(env, cmd)
-        super(RemoteGPUProcess, self).__init__(user, host, cmd, workspace, private_key_path, output_file)
+        super(RemoteGPUProcess, self).__init__(user, host, cmd, workspace, port, private_key_path, output_file)
 
 
 def run_task(task, available_server):
@@ -82,6 +82,7 @@ def run_task(task, available_server):
             gpus,
             task.cmd,
             task.workspace,
+            server.port,
             task.user.config.server_private_key_path,
             log_file_path
         )

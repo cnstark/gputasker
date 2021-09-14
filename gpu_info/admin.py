@@ -35,9 +35,9 @@ class GPUInfoInline(admin.TabularInline):
 
 @admin.register(GPUServer)
 class GPUServerAdmin(admin.ModelAdmin):
-    list_display = ('ip', 'hostname', 'valid', 'can_use')
+    list_display = ('ip', 'hostname', 'port', 'valid', 'can_use')
     list_editable = ('can_use',)
-    search_fields = ('ip', 'hostname', 'valid', 'can_use')
+    search_fields = ('ip', 'hostname', 'port', 'valid', 'can_use')
     list_display_links = ('ip',)
     inlines = (GPUInfoInline,)
     ordering = ('ip',)
