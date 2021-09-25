@@ -4,8 +4,9 @@ from django.db import models
 
 
 class GPUServer(models.Model):
-    ip = models.CharField('IP地址', max_length=50, primary_key=True)
+    ip = models.CharField('IP地址', max_length=50)
     hostname = models.CharField('主机名', max_length=50, blank=True, null=True)
+    port = models.PositiveIntegerField('端口', default=22)
     valid = models.BooleanField('是否可用', default=True)
     can_use = models.BooleanField('是否可调度', default=True)
     # TODO(Yuhao Wang): CPU使用率
@@ -14,9 +15,10 @@ class GPUServer(models.Model):
         ordering = ('ip',)
         verbose_name = 'GPU服务器'
         verbose_name_plural = 'GPU服务器'
+        unique_together = (('ip', 'port'),)
 
     def __str__(self):
-        return self.ip
+        return '{}:{:d}'.format(self.ip, self.port)
 
     def get_available_gpus(self, gpu_num, exclusive, memory, utilization):
         available_gpu_list = []

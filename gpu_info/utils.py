@@ -8,35 +8,37 @@ from .models import GPUServer, GPUInfo
 task_logger = logging.getLogger('django.task')
 
 
-def ssh_execute(host, user, exec_cmd, private_key_path=None):
+def ssh_execute(host, user, exec_cmd, port=22, private_key_path=None):
     if private_key_path is None:
-        cmd = "ssh -o StrictHostKeyChecking=no {}@{} \"{}\"".format(user, host, exec_cmd)
+        cmd = "ssh -o StrictHostKeyChecking=no -p {:d} {}@{} \"{}\"".format(port, user, host, exec_cmd)
     else:
-        cmd = "ssh -o StrictHostKeyChecking=no -i {} {}@{} \"{}\"".format(private_key_path, user, host, exec_cmd)
+        cmd = "ssh -o StrictHostKeyChecking=no -p {:d} -i {} {}@{} \"{}\"".format(port, private_key_path, user, host, exec_cmd)
     return subprocess.check_output(cmd, timeout=60, shell=True)
 
 
-def get_hostname(host, user, private_key_path=None):
+def get_hostname(host, user, port=22, private_key_path=None):
     cmd = "hostname"
     return str(ssh_execute(
         host,
         user,
         cmd,
+        port,
         private_key_path
     ).replace(b'\n', b'')).replace('b\'', '').replace('\'', '')
 
 
 def add_hostname(server, user, private_key_path=None):
-    hostname = get_hostname(server.ip, user, private_key_path)
+    hostname = get_hostname(server.ip, user, server.port, private_key_path)
     server.hostname = hostname
     server.save()
 
 
-def get_gpu_info(host, user, gpustat_path, private_key_path=None):
+def get_gpu_info(host, user, gpustat_path, port=22, private_key_path=None):
     return json.loads(ssh_execute(
         host,
         user,
         '{} --json'.format(gpustat_path),
+        port,
         private_key_path
     ).replace(b'\n', b''))
 
@@ -64,7 +66,7 @@ class GPUInfoUpdater:
             try:
                 if server.hostname is None or server.hostname == '':
                     add_hostname(server, self.user, self.private_key_path)
-                gpu_info_json = get_gpu_info(server.ip, self.user, self.gpustat_path, self.private_key_path)
+                gpu_info_json = get_gpu_info(server.ip, self.user, self.gpustat_path, server.port, self.private_key_path)
                 if not server.valid:
                     server.valid = True
                     server.save()
