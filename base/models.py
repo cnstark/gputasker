@@ -15,7 +15,6 @@ class UserConfig(models.Model):
 
 class SystemConfig(models.Model):
     user = models.OneToOneField(User, verbose_name='系统管理员', on_delete=models.CASCADE, related_name='system_config', primary_key=True)
-    gpustat_path = models.CharField('gpustat路径', max_length=100)
 
     class Meta:
         verbose_name = '系统设置'

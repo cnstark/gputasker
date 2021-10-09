@@ -22,9 +22,9 @@ task_logger = logging.getLogger('django.task')
 
 
 if __name__ == '__main__':
-    server_username, server_private_key_path, gpustat_path = get_admin_config()
+    server_username, server_private_key_path = get_admin_config()
 
-    gpu_updater = GPUInfoUpdater(server_username, gpustat_path, server_private_key_path)
+    gpu_updater = GPUInfoUpdater(server_username, server_private_key_path)
     while True:
         task_logger.info('Running processes: {:d}'.format(
             threading.active_count() - 1
