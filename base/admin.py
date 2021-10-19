@@ -38,7 +38,7 @@ class UserConfigAdmin(admin.ModelAdmin):
 
 @admin.register(SystemConfig)
 class SystemConfigAdmin(admin.ModelAdmin):
-    list_display = ('user', 'gpustat_path',)
+    list_display = ('user',)
     list_display_links = ('user',)
 
     def get_queryset(self, request):

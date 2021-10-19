@@ -9,6 +9,9 @@ task_logger = logging.getLogger('django.task')
 
 
 def ssh_execute(host, user, exec_cmd, port=22, private_key_path=None):
+    exec_cmd = exec_cmd.replace('\r\n', '\n').replace('$', '\\$')
+    if exec_cmd[-1] != '\n':
+        exec_cmd = exec_cmd + '\n'
     if private_key_path is None:
         cmd = "ssh -o StrictHostKeyChecking=no -p {:d} {}@{} \"{}\"".format(port, user, host, exec_cmd)
     else:
@@ -33,21 +36,69 @@ def add_hostname(server, user, private_key_path=None):
     server.save()
 
 
-def get_gpu_info(host, user, gpustat_path, port=22, private_key_path=None):
-    return json.loads(ssh_execute(
-        host,
-        user,
-        '{} --json'.format(gpustat_path),
-        port,
-        private_key_path
-    ).replace(b'\n', b''))
+def get_gpu_status(host, user, port=22, private_key_path=None):
+    gpu_info_list = []
+    query_gpu_cmd = 'nvidia-smi --query-gpu=uuid,gpu_name,utilization.gpu,memory.total,memory.used --format=csv | grep -v \'uuid\''
+    gpu_info_raw = ssh_execute(host, user, query_gpu_cmd, port, private_key_path).decode('utf-8')
+
+    gpu_info_dict = {}
+    for index, gpu_info_line in enumerate(gpu_info_raw.split('\n')):
+        try:
+            gpu_info_items = gpu_info_line.split(',')
+            gpu_info = {}
+            gpu_info['index'] = index
+            gpu_info['uuid'] = gpu_info_items[0].strip()
+            gpu_info['name'] = gpu_info_items[1].strip()
+            gpu_info['utilization.gpu'] = int(gpu_info_items[2].strip().split(' ')[0])
+            gpu_info['memory.total'] = int(gpu_info_items[3].strip().split(' ')[0])
+            gpu_info['memory.used'] = int(gpu_info_items[4].strip().split(' ')[0])
+            gpu_info['processes'] = []
+            gpu_info_list.append(gpu_info)
+            gpu_info_dict[gpu_info['uuid']] = gpu_info
+        except Exception:
+            continue
+
+    pid_set = set([])
+    if len(gpu_info_list) != 0:
+        query_apps_cmd = 'nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv'
+        app_info_raw = ssh_execute(host, user, query_apps_cmd, port, private_key_path).decode('utf-8')
+
+        for app_info_line in app_info_raw.split('\n')[1:]:
+            try:
+                app_info_items = app_info_line.split(',')
+                app_info = {}
+                uuid = app_info_items[0].strip()
+                app_info['pid'] = int(app_info_items[1].strip())
+                app_info['command'] = app_info_items[2].strip()
+                app_info['gpu_memory_usage'] = int(app_info_items[3].strip().split(' ')[0])
+                if app_info['gpu_memory_usage'] != 0:
+                    gpu_info_dict[uuid]['processes'].append(app_info)
+                    pid_set.add(app_info['pid'])
+            except Exception:
+                continue
+
+    pid_username_dict = {}
+    if len(pid_set) != 0:
+        query_pid_cmd = 'ps -o ruser=userForLongName -o pid -p ' + ' '.join(map(str, pid_set)) + ' | awk \'{print $1, $2}\' | grep -v \'PID\''
+        pid_raw = ssh_execute(host, user, query_pid_cmd, port, private_key_path).decode('utf-8')
+        for pid_line in pid_raw.split('\n'):
+            try:
+                username, pid = pid_line.split(' ')
+                pid = int(pid.strip())
+                pid_username_dict[pid] = username.strip()
+            except Exception:
+                continue
+    for gpu_info in gpu_info_list:
+        for process in gpu_info['processes']:
+            process['username'] = pid_username_dict.get(process['pid'], '')
+
+    return gpu_info_list
 
 
 class GPUInfoUpdater:
-    def __init__(self, user, gpustat_path, private_key_path=None):
+    def __init__(self, user, private_key_path=None):
         self.user = user
         self.private_key_path = private_key_path
-        self.gpustat_path = gpustat_path
         self.utilization_history = {}
     
     def update_utilization(self, uuid, utilization):
@@ -66,11 +117,11 @@ class GPUInfoUpdater:
             try:
                 if server.hostname is None or server.hostname == '':
                     add_hostname(server, self.user, self.private_key_path)
-                gpu_info_json = get_gpu_info(server.ip, self.user, self.gpustat_path, server.port, self.private_key_path)
+                gpu_info_json = get_gpu_status(server.ip, self.user, server.port, self.private_key_path)
                 if not server.valid:
                     server.valid = True
                     server.save()
-                for gpu in gpu_info_json['gpus']:
+                for gpu in gpu_info_json:
                     if GPUInfo.objects.filter(uuid=gpu['uuid']).count() == 0:
                         gpu_info = GPUInfo(
                             uuid=gpu['uuid'],

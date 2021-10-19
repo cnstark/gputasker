@@ -16,5 +16,4 @@ def get_admin_config():
             'Please login admin site and create a config for user {}!'.format(system_config[0].user.username)
         )
     return system_config[0].user.config.server_username, \
-        system_config[0].user.config.server_private_key_path, \
-        system_config[0].gpustat_path
+        system_config[0].user.config.server_private_key_path
