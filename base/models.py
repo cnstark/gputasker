@@ -11,11 +11,3 @@ class UserConfig(models.Model):
     class Meta:
         verbose_name = '用户设置'
         verbose_name_plural = '用户设置'
-
-
-class SystemConfig(models.Model):
-    user = models.OneToOneField(User, verbose_name='系统管理员', on_delete=models.CASCADE, related_name='system_config', primary_key=True)
-
-    class Meta:
-        verbose_name = '系统设置'
-        verbose_name_plural = '系统设置'

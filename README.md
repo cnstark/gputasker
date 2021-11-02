@@ -16,8 +16,6 @@ GPU Tasker是一款GPU任务调度工具，适用于GPU机群或单机环境，�
 
 在机群环境下，将GPU Tasker安装在机群环境下的一台服务器或PC，安装GPU Tasker的服务器成为Master，其余服务器称为Node，Master可以通过ssh连接所有Node服务器。**建议Node服务器连接NAS或拥有共享目录，并连接LDAP。**
 
-* Master
-
 安装django、django-simpleui
 
 ```shell
@@ -55,7 +53,7 @@ python manage.py createsuperuser
 * 启动服务
 
 ```shell
-python manage.py runserver 0:8888
+python manage.py runserver --insecure 0.0.0.0:8888
 ```
 
 * 基本设置
@@ -69,10 +67,6 @@ python manage.py runserver 0:8888
 暂只支持每个服务器使用相同的用户名，后续版本迭代可能会支持。
 
 ![home](.assets/user_config.png)
-
-添加`系统设置`，选择系统管理员。GPU Tasker会使用系统管理员的用户登录Node服务器，执行`nvidia-smi`刷新GPU状态。
-
-![home](.assets/system_config.png)
 
 * 启动主进程
 

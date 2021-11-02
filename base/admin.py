@@ -2,8 +2,9 @@ import os, stat
 
 from django.contrib import admin
 
-from .models import UserConfig, SystemConfig
+from .models import UserConfig
 from gpu_tasker.settings import PRIVATE_KEY_DIR
+
 
 @admin.register(UserConfig)
 class UserConfigAdmin(admin.ModelAdmin):
@@ -33,24 +34,4 @@ class UserConfigAdmin(admin.ModelAdmin):
         with open(obj.server_private_key_path, 'w') as f:
             f.write(obj.server_private_key)
         os.chmod(obj.server_private_key_path, stat.S_IWUSR | stat.S_IREAD)
-        super().save_model(request, obj, form, change)
-
-
-@admin.register(SystemConfig)
-class SystemConfigAdmin(admin.ModelAdmin):
-    list_display = ('user',)
-    list_display_links = ('user',)
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(user=request.user)
-    
-    def has_add_permission(self, request):
-        return SystemConfig.objects.all().count() == 0
-
-    def save_model(self, request, obj, form, change):
-        if not change:
-            SystemConfig.objects.all().delete()
         super().save_model(request, obj, form, change)
