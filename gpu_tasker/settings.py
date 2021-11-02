@@ -78,12 +78,24 @@ WSGI_APPLICATION = 'gpu_tasker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.getenv('DOCKER_DEPLOY') is None:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'gpu_tasker',
+            'USER': 'root',
+            'PASSWORD': 'gpu_tasker',
+            'HOST': 'mysql',
+            'PORT': '3306',
+        }
+    }
 
 
 # Password validation
@@ -126,6 +138,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+STATIC_ROOT = 'static_collected'
 
 SIMPLEUI_ANALYSIS = False
 SIMPLEUI_HOME_INFO = False
