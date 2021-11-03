@@ -24,7 +24,9 @@ pip install django django-simpleui
 
 ### 部署GPU Tasker
 
-由于开发时间有限，尚未支持一键部署，后续版本迭代会逐步支持。部署环节建议有django基础
+GPU Tasker支持手动部署与Docker部署。
+
+#### 手动部署
 
 * 在Master服务器clone本项目
 
@@ -56,7 +58,38 @@ python manage.py createsuperuser
 python manage.py runserver --insecure 0.0.0.0:8888
 ```
 
-* 基本设置
+* 启动主进程
+
+```shell
+python main.py
+```
+
+#### Docker部署
+
+* 安装[Docker](https://docs.docker.com/get-docker/)与[docker-compose](https://docs.docker.com/compose/install/)
+
+* 在Master服务器clone本项目
+
+```shell
+git clone https://github.com/cnstark/gputasker.git
+cd gputasker
+```
+
+* 启动GPUTasker
+
+```shell
+sudo docker-compose up -d
+```
+
+* 创建超级用户
+
+```shell
+sudo docker exec -it gputasker_django python manage.py createsuperuser
+```
+
+根据提示输入信息，完成创建。
+
+### 基本设置
 
 访问`http://your_server:8888/admin`，登录管理后台。
 
@@ -67,12 +100,6 @@ python manage.py runserver --insecure 0.0.0.0:8888
 暂只支持每个服务器使用相同的用户名，后续版本迭代可能会支持。
 
 ![home](.assets/user_config.png)
-
-* 启动主进程
-
-```shell
-python main.py
-```
 
 ### 添加Node节点
 

@@ -44,7 +44,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     ports:
-      - '8080:80'
+      - '8888:80'
     depends_on:
       - gputasker
     networks:
