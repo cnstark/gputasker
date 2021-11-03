@@ -83,6 +83,8 @@ sudo docker-compose up -d
 
 * 创建超级用户
 
+注意：初次使用时需要等待初始化完成后才能创建超级用户，等待时间约30秒。当`http://your_server:8888/admin`可以正常访问后再执行：
+
 ```shell
 sudo docker exec -it gputasker_django python manage.py createsuperuser
 ```
