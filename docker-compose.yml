@@ -3,7 +3,7 @@ version: "3"
 services:
   mysql:
     image: mysql:8.0
-    container_name: gpu_tasker_mysql
+    container_name: gputasker_mysql
     volumes:
       - ./mysql:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
@@ -12,12 +12,12 @@ services:
       - MYSQL_DATABASE=gpu_tasker
       - MYSQL_ROOT_PASSWORD=gpu_tasker
     networks:
-      - gpu_tasker_net
+      - gputasker_net
     command: "--default-authentication-plugin=mysql_native_password"
 
-  gpu_tasker:
-    image: yuhaow/gpu_tasker:latest
-    container_name: gpu_tasker_django
+  gputasker:
+    image: yuhaow/gputasker:latest
+    container_name: gputasker_django
     volumes:
       - ./server_log:/gpu_tasker/server_log
       - ./running_log:/gpu_tasker/running_log
@@ -27,11 +27,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     networks:
-      - gpu_tasker_net
+      - gputasker_net
 
   nginx:
     image: nginx:latest
-    container_name: gpu_tasker_nginx
+    container_name: gputasker_nginx
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/log:/var/log/nginx
@@ -42,7 +42,7 @@ services:
     ports:
       - '8080:80'
     networks:
-      - gpu_tasker_net
+      - gputasker_net
 
 networks:
-  gpu_tasker_net:
+  gputasker_net:
