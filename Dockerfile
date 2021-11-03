@@ -3,7 +3,7 @@ FROM python:3.9
 RUN apt update && \
     apt install -y openssh-client
 
-RUN pip install django django-simpleui uwsgi
+RUN pip install django django-simpleui mysqlclient uwsgi
 
 ENV DOCKER_DEPLOY 1
 
