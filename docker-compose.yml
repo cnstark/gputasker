@@ -39,6 +39,8 @@ services:
       - ./uwsgi/log:/gpu_tasker/uwsgi/log
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    ports:
+      - '8080:80'
     networks:
       - gpu_tasker_net
 
