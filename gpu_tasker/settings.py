@@ -90,9 +90,9 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'gpu_tasker',
-            'USER': 'root',
+            'USER': 'gpu_tasker',
             'PASSWORD': 'gpu_tasker',
-            'HOST': 'mysql',
+            'HOST': 'mariadb',
             'PORT': '3306',
         }
     }

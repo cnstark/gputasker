@@ -1,19 +1,21 @@
 version: "3"
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: gputasker_mysql
+  mariadb:
+    image: mariadb:10.1
+    container_name: gputasker_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: gpu_tasker
+      MYSQL_USER: gpu_tasker
+      MYSQL_PASSWORD: gpu_tasker
+      MYSQL_DATABASE: gpu_tasker
+    restart: unless-stopped
     volumes:
       - ./mysql:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    environment:
-      - MYSQL_DATABASE=gpu_tasker
-      - MYSQL_ROOT_PASSWORD=gpu_tasker
     networks:
       - gputasker_net
-    command: "--default-authentication-plugin=mysql_native_password"
 
   gputasker:
     image: yuhaow/gputasker:latest
