@@ -24,4 +24,4 @@ VOLUME /gpu_tasker/uwsgi/log
 
 EXPOSE 9009
 
-ENTRYPOINT ["/wait-for-it.sh", "mariadb:3306", "--", "./entrypoint.sh"]
+ENTRYPOINT ["/wait-for-it.sh", "mariadb:3306", "-t", "180", "--", "./entrypoint.sh"]
