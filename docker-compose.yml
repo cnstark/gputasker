@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gpu_tasker_mysql
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - MYSQL_DATABASE=gpu_tasker
+      - MYSQL_ROOT_PASSWORD=gpu_tasker
+    networks:
+      - gpu_tasker_net
+    command: "--default-authentication-plugin=mysql_native_password"
+
+  gpu_tasker:
+    image: yuhaow/gpu_tasker:latest
+    container_name: gpu_tasker_django
+    volumes:
+      - ./server_log:/gpu_tasker/server_log
+      - ./running_log:/gpu_tasker/running_log
+      - ./private_key:/gpu_tasker/private_key
+      - ./static_collected:/gpu_tasker/static_collected
+      - ./uwsgi/log:/gpu_tasker/uwsgi/log
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - gpu_tasker_net
+
+  nginx:
+    image: nginx:latest
+    container_name: gpu_tasker_nginx
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/log:/var/log/nginx
+      - ./static_collected:/static_collected
+      - ./uwsgi/log:/gpu_tasker/uwsgi/log
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - gpu_tasker_net
+
+networks:
+  gpu_tasker_net:
