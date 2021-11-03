@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+  mariadb:
+    image: mariadb:10.1
+    container_name: gputasker_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: gpu_tasker
+      MYSQL_USER: gpu_tasker
+      MYSQL_PASSWORD: gpu_tasker
+      MYSQL_DATABASE: gpu_tasker
+    restart: unless-stopped
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - gputasker_net
+
+  gputasker:
+    image: yuhaow/gputasker:latest
+    container_name: gputasker_django
+    volumes:
+      - ./server_log:/gpu_tasker/server_log
+      - ./running_log:/gpu_tasker/running_log
+      - ./private_key:/gpu_tasker/private_key
+      - ./static_collected:/gpu_tasker/static_collected
+      - ./uwsgi/log:/gpu_tasker/uwsgi/log
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    depends_on:
+      - mariadb
+    networks:
+      - gputasker_net
+
+  nginx:
+    image: nginx:latest
+    container_name: gputasker_nginx
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/log:/var/log/nginx
+      - ./static_collected:/static_collected
+      - ./uwsgi/log:/gpu_tasker/uwsgi/log
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    ports:
+      - '8888:80'
+    depends_on:
+      - gputasker
+    networks:
+      - gputasker_net
+
+networks:
+  gputasker_net:
