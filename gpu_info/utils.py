@@ -41,6 +41,9 @@ def get_gpu_status(host, user, port=22, private_key_path=None):
     query_gpu_cmd = 'nvidia-smi --query-gpu=uuid,gpu_name,utilization.gpu,memory.total,memory.used --format=csv | grep -v \'uuid\''
     gpu_info_raw = ssh_execute(host, user, query_gpu_cmd, port, private_key_path).decode('utf-8')
 
+    if gpu_info_raw.find('Error') != -1:
+        raise RuntimeError(gpu_info_raw)
+
     gpu_info_dict = {}
     for index, gpu_info_line in enumerate(gpu_info_raw.split('\n')):
         try:
@@ -143,7 +146,7 @@ class GPUInfoUpdater:
                         gpu_info.complete_free = len(gpu['processes']) == 0
                         gpu_info.processes = '\n'.join(map(lambda x: json.dumps(x), gpu['processes']))
                         gpu_info.save()
-            except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, RuntimeError):
                 task_logger.error('Update ' + server.ip + ' failed')
                 server.valid = False
                 server.save()
