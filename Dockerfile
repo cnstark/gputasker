@@ -1,9 +1,12 @@
 FROM python:3.9
 
 RUN apt update && \
-    apt install -y openssh-client
+    apt install -y openssh-client && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install django django-simpleui mysqlclient uwsgi
+RUN pip install django django-simpleui mysqlclient uwsgi && \
+    rm -r /root/.cache/pip
 
 ENV DOCKER_DEPLOY 1
 
