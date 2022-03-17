@@ -18,7 +18,7 @@ services:
       - gputasker_net
 
   gputasker:
-    image: yuhaow/gputasker:latest
+    image: cnstark/gputasker:latest
     container_name: gputasker_django
     volumes:
       - ./server_log:/gpu_tasker/server_log

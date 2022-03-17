@@ -3,7 +3,7 @@
 轻量好用的GPU机群任务调度工具
 
 [![simpleui](https://img.shields.io/badge/developing%20with-Simpleui-2077ff.svg)](https://github.com/newpanjing/simpleui)
-[![docker build](https://github.com/cnstark/gputasker/actions/workflows/docker-build.yml/badge.svg)](https://hub.docker.com/repository/docker/yuhaow/gputasker)
+[![docker build](https://github.com/cnstark/gputasker/actions/workflows/docker-build.yml/badge.svg)](https://hub.docker.com/r/cnstark/gputasker)
 
 ## 介绍
 
