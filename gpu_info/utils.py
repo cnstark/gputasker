@@ -82,15 +82,18 @@ def get_gpu_status(host, user, port=22, private_key_path=None):
 
     pid_username_dict = {}
     if len(pid_set) != 0:
-        query_pid_cmd = 'ps -o ruser=userForLongName -o pid -p ' + ' '.join(map(str, pid_set)) + ' | awk \'{print $1, $2}\' | grep -v \'PID\''
-        pid_raw = ssh_execute(host, user, query_pid_cmd, port, private_key_path).decode('utf-8')
-        for pid_line in pid_raw.split('\n'):
-            try:
-                username, pid = pid_line.split(' ')
-                pid = int(pid.strip())
-                pid_username_dict[pid] = username.strip()
-            except Exception:
-                continue
+        try:
+            query_pid_cmd = 'ps -o ruser=userForLongName -o pid -p ' + ' '.join(map(str, pid_set)) + ' | awk \'{print $1, $2}\' | grep -v \'PID\''
+            pid_raw = ssh_execute(host, user, query_pid_cmd, port, private_key_path).decode('utf-8')
+            for pid_line in pid_raw.split('\n'):
+                try:
+                    username, pid = pid_line.split(' ')
+                    pid = int(pid.strip())
+                    pid_username_dict[pid] = username.strip()
+                except Exception:
+                    continue
+        except Exception:
+            pass
     for gpu_info in gpu_info_list:
         for process in gpu_info['processes']:
             process['username'] = pid_username_dict.get(process['pid'], '')
